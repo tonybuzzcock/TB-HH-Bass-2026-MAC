@@ -312,8 +312,14 @@ int main (int argc, char** argv)
         pump (0.2);
     }
     check (fileHasLine (presetFile, "name 3: Dub on the 15"), "Return saves the name with the preset");
-    bool gone = true;
-    for (NSView* sv in [panel subviews]) if ([sv isKindOfClass: [NSTextField class]]) gone = false;
+    // The box is taken away just after its own event finishes: give the run loop up to 2 s.
+    bool gone = false;
+    for (int t = 0; t < 40 && ! gone; ++t)
+    {
+        gone = true;
+        for (NSView* sv in [panel subviews]) if ([sv isKindOfClass: [NSTextField class]]) gone = false;
+        if (! gone) pump (0.05);
+    }
     check (gone, "and the name box goes away");
     renderPNG (panel, dir + "/panel_preset_saved.png");
 
